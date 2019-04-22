@@ -12,11 +12,13 @@ class GameModule(game: FallingTetrominoes) {
 
     init {
         context.register {
+            bindSingleton(Sound())
             bindSingleton(game)
             bindSingleton(SpriteBatch())
             bindSingleton(PooledEngine())
             bindSingleton(SpawningLocation())
             bindSingleton(GameplayKeys())
+            bindSingleton(MenuKeys())
         }
 
         context.register {

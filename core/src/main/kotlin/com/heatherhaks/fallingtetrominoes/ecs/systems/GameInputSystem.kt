@@ -8,8 +8,6 @@ import com.heatherhaks.fallingtetrominoes.ecs.components.RotationComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.StickingComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.GameplayKeys
-import com.heatherhaks.fallingtetrominoes.input.InputHandler
-import com.heatherhaks.fallingtetrominoes.input.KeyState
 import com.heatherhaks.fallingtetrominoes.safeAdd
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
 import com.heatherhaks.fallingtetrominoes.timers.Timer
@@ -21,16 +19,14 @@ import ktx.log.*
 
 //TODO DAS should be able to be charged while waiting for a piece to spawn
 
-class InputSystem(val context: Context, val map: List<Array<Entity>>, val tetrominoes: Array<Entity>) : IteratingSystem(allOf(HasPlayerInputComponent::class).get()) {
+class GameInputSystem(val context: Context, val map: List<Array<Entity>>, val tetrominoes: Array<Entity>) : IteratingSystem(allOf(HasPlayerInputComponent::class).get()) {
 
     companion object {
-        val log = logger<InputSystem>()
+        val log = logger<GameInputSystem>()
     }
 
     private val DAS_DELAY = 0.25f
     private val DAS_GOAL = 0.05f
-
-    private val inputHandler = context.inject<InputHandler>()
 
     private var lateralDelta = 0
     private var verticalDelta = 0
@@ -53,13 +49,6 @@ class InputSystem(val context: Context, val map: List<Array<Entity>>, val tetrom
             lateralDelta = 0
             verticalDelta = 0
 
-//            val leftKey = inputHandler.keyMap["LEFT"]!!
-//            val rightKey = inputHandler.keyMap["RIGHT"]!!
-//            val downKey = inputHandler.keyMap["DOWN"]!!
-//            val hardDropKey = inputHandler.keyMap["HARD_DROP"]!!
-//            val clockwiseKey = inputHandler.keyMap["CLOCKWISE"]!!
-//            val counterclockwiseKey = inputHandler.keyMap["COUNTERCLOCKWISE"]!!
-
             if(gameplayKeys.leftKey.isActive() && gameplayKeys.rightKey.isNotActive()) {
                 lateralMove(deltaTime, leftTimer, leftStatus, -1)
             } else {
@@ -75,13 +64,9 @@ class InputSystem(val context: Context, val map: List<Array<Entity>>, val tetrom
                 rightTimer.stop()
             }
 
-            if(gameplayKeys.downKey.isActive()) {
-                softDrop(deltaTime, dropTimer)
-            }
+            if(gameplayKeys.softDropKey.isActive()) softDrop(deltaTime, dropTimer)
 
-            if(gameplayKeys.hardDropKey.isJustPressed()) {
-                hardDrop()
-            }
+            if(gameplayKeys.hardDropKey.isJustPressed()) hardDrop()
 
             if(gameplayKeys.clockwiseKey.isJustPressed()) {
                 tetrominoes[0].safeAdd(RotationComponent::class.java, engine)

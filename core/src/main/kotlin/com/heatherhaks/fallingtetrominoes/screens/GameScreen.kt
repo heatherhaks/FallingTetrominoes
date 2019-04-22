@@ -1,7 +1,6 @@
 package com.heatherhaks.fallingtetrominoes.screens
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.halfdeadgames.kterminal.KTerminalData
 import com.heatherhaks.fallingtetrominoes.FallingTetrominoes
@@ -17,9 +16,7 @@ import com.heatherhaks.fallingtetrominoes.injection.wrappers.Renderers
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.SpawningLocation
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.Terminals
 import com.heatherhaks.fallingtetrominoes.input.InputHandler
-import com.heatherhaks.fallingtetrominoes.input.KeyData
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
-import com.heatherhaks.fallingtetrominoes.updated
 import ktx.app.KtxScreen
 import ktx.ashley.get
 import ktx.ashley.has
@@ -62,7 +59,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val stickingSystem = StickingSystem(tetrominoes, map)
     private val ghostDrawingSystem = GhostDrawingSystem(context, tetrominoes, offsetX + 3, offsetY + 1)
     private val ghostPositioningSystem = GhostPositioningSystem(tetrominoes, map)
-    private val inputSystem = InputSystem(context, map, tetrominoes)
+    private val inputSystem = GameInputSystem(context, map, tetrominoes)
 
     private fun resetMap() {
         map.forEachIndexed {j, row ->
@@ -142,9 +139,6 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
         clearLines()
         engine.update(delta)
 
-        val gameplayKeys = context.inject<GameplayKeys>()
-//        println(gameplayKeys.leftKey)
-//        println(inputHandler.keyMap)
         inputHandler.tick(delta)
         batch.use {
             renderTerminals(0f, 0f)

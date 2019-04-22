@@ -10,7 +10,7 @@ import com.heatherhaks.fallingtetrominoes.ecs.components.NeedsSpawningComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.PositionComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.SpawningLocation
-import com.heatherhaks.fallingtetrominoes.screens.MenuScreen
+import com.heatherhaks.fallingtetrominoes.screens.menus.MainMenuScreen
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
 import ktx.ashley.allOf
 import ktx.ashley.get
@@ -61,7 +61,8 @@ class SpawningSystem(context: Context, val game: FallingTetrominoes, val tetromi
                 }
 
                 if(Collision.isCollided(tetrominoes[0][Mappers.tetrominoMapper]!!.blocks, map)) {
-                    game.setScreen<MenuScreen>()
+                    game.setScreen<MainMenuScreen>()
+                    //TODO replace with game over stats screen
                 }
 
             } else {
