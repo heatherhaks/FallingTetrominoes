@@ -65,8 +65,8 @@ class FallingTetrominoes : KtxGame<KtxScreen>() {
         addScreen(MenuControlsMenuScreen(context))
 
 //        addScreen(OldMenuScreen(context))
-//        setScreen<GameScreen>()
-        setScreen<MainMenuScreen>()
+        setScreen<GameScreen>()
+//        setScreen<MainMenuScreen>()
     }
 
     override fun dispose() {

@@ -1,6 +1,7 @@
 package com.heatherhaks.fallingtetrominoes.screens
 
 import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.halfdeadgames.kterminal.KTerminalData
 import com.heatherhaks.fallingtetrominoes.FallingTetrominoes
@@ -10,13 +11,11 @@ import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
 import com.heatherhaks.fallingtetrominoes.ecs.systems.*
 import com.heatherhaks.fallingtetrominoes.ecs.templates.BlockBuilder
 import com.heatherhaks.fallingtetrominoes.ecs.templates.TetrominoBuilder
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.GameplayKeys
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.*
 import com.heatherhaks.fallingtetrominoes.safeAdd
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.Renderers
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.SpawningLocation
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.Terminals
 import com.heatherhaks.fallingtetrominoes.input.InputHandler
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
+import com.heatherhaks.fallingtetrominoes.timers.Timer
 import ktx.app.KtxScreen
 import ktx.ashley.get
 import ktx.ashley.has
@@ -24,11 +23,9 @@ import ktx.ashley.hasNot
 import ktx.graphics.use
 import ktx.inject.Context
 
-
-//TODO implement music options
 //TODO implement kicks
 //TODO implement score
-//TODO implement pause screen
+//TODO refactor pause screen + link to options screen
 
 class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val batch = context.inject<SpriteBatch>()
@@ -56,10 +53,14 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val tetrominoDrawingSystem = TetrominoDrawingSystem(context, offsetX + 3, offsetY + 1)
     private val holdDrawingSystem = HoldDrawingSystem(context, (offsetX * 2) + 2, (offsetY * 2) + 5)
     private val gravitySystem = GravitySystem(tetrominoes, map, context)
-    private val stickingSystem = StickingSystem(tetrominoes, map)
+    private val stickingSystem = StickingSystem(tetrominoes, map, context)
     private val ghostDrawingSystem = GhostDrawingSystem(context, tetrominoes, offsetX + 3, offsetY + 1)
     private val ghostPositioningSystem = GhostPositioningSystem(tetrominoes, map)
     private val inputSystem = GameInputSystem(context, map, tetrominoes)
+
+    var startTimer = Timer(3f)
+    val pauseStatus = context.inject<PauseStatus>()
+    val gameplayKeys = context.inject<GameplayKeys>()
 
     private fun resetMap() {
         map.forEachIndexed {j, row ->
@@ -71,6 +72,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
             }
         }
     }
+
     private fun addSystems() {
         engine.addSystem(inputSystem)
         engine.addSystem(playfieldDrawingSystem)
@@ -98,7 +100,6 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     init {
         //TODO replace with leveling as you clear lines
 
-
         map.forEach {
             it.forEach{ block ->
                 engine.addEntity(block)
@@ -124,6 +125,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     override fun show() {
         super.show()
 
+        startTimer.start()
         resetMap()
         TetrominoHandler.reset(tetrominoes)
     }
@@ -135,14 +137,47 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
 
         updateTetrominoes()
         drawBorder()
-
         clearLines()
         engine.update(delta)
 
+        if(pauseStatus.isPaused) {
+            if(startTimer.isNotRunning() && startTimer.isNotFinished()) displayPausePanel()
+            if(gameplayKeys.pauseKey.isJustPressed()) {
+                startTimer.restart()
+            }
+        } else {
+            if(gameplayKeys.pauseKey.isJustPressed()) {
+                pauseStatus.isPaused = true
+            }
+        }
+
+        if(startTimer.isFinished()) {
+            pauseStatus.isNotPaused = true
+            startTimer.stop()
+        }
+
+        if(startTimer.isRunning()) handleStartTimerAndDisplay(delta)
+
+        startTimer.update(delta)
+
         inputHandler.tick(delta)
+
         batch.use {
             renderTerminals(0f, 0f)
         }
+    }
+
+    private fun displayPausePanel() {
+        terminals.main[offsetX + 4,offsetY + 9][Color.WHITE, Color.BLACK]
+                .setCursorOffset(-0.3f, 0f).drawSingleBox(9, 3, true)
+        terminals.main[offsetX + 6, offsetY + 10].write("Pause")
+    }
+
+    private fun handleStartTimerAndDisplay(delta: Float) {
+        val timeLeft = 3 - startTimer.count.toInt()
+        terminals.main[offsetX + 4,offsetY + 9][Color.WHITE, Color.BLACK]
+                .setCursorOffset(-0.3f, 0f).drawSingleBox(9, 3, true)
+        terminals.main[offsetX + 8, offsetY + 10].write("$timeLeft")
     }
 
     private fun clearLines() {
@@ -182,10 +217,10 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     }
 
     private fun renderTerminals(x: Float, y: Float) {
-        renderers.main.render(x, y, terminals.main)
         renderers.tetromino.render(x, y, terminals.playBottom)
         renderers.tetromino.render(x, y, terminals.playTop)
         renderers.halfRes.render(x, y, terminals.halfRes)
+        renderers.main.render(x, y, terminals.main)
     }
 
     private fun drawBorder() {

@@ -21,8 +21,11 @@ class Timer(var goal: Float = 0f) {
     }
 
     fun isFinished() : Boolean = status == FINISHED
+    fun isNotFinished() : Boolean = !isFinished()
     fun isStopped() : Boolean = status == STOPPED
+    fun isNotStopped() : Boolean = !isStopped()
     fun isRunning() : Boolean = status == RUNNING
+    fun isNotRunning() : Boolean = !isRunning()
 
     fun start() {
         status = RUNNING

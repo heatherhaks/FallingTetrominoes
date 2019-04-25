@@ -9,6 +9,7 @@ import com.heatherhaks.fallingtetrominoes.ecs.components.FallingComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.NeedsSpawningComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.PositionComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.PauseStatus
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.SpawningLocation
 import com.heatherhaks.fallingtetrominoes.screens.menus.MainMenuScreen
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
@@ -26,8 +27,10 @@ class SpawningSystem(context: Context, val game: FallingTetrominoes, val tetromi
 
     val spawningLocation = context.inject<SpawningLocation>()
 
+    val pauseStatus = context.inject<PauseStatus>()
+
     override fun processEntity(entity: Entity?, deltaTime: Float) {
-        entity?.let {
+        if(pauseStatus.isNotPaused) entity?.let {
             val timer = it[Mappers.needsSpawningMapper]?.timer ?: NeedsSpawningComponent().timer
 
             log.debug { "Entity with spawning component found: Timer: $timer" }

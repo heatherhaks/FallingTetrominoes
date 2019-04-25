@@ -3,16 +3,16 @@ package com.heatherhaks.fallingtetrominoes.ecs.systems
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.Color
-import com.halfdeadgames.kterminal.KTerminalGlyph
 import com.heatherhaks.fallingtetrominoes.collisiondetection.Collision
 import com.heatherhaks.fallingtetrominoes.ecs.components.*
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.PauseStatus
 import ktx.ashley.allOf
 import ktx.ashley.get
-import ktx.ashley.remove
+import ktx.inject.Context
 import ktx.log.logger
 
-class StickingSystem(val tetrominoes: Array<Entity>, val map: List<Array<Entity>>) : IteratingSystem(
+class StickingSystem(val tetrominoes: Array<Entity>, val map: List<Array<Entity>>, val context: Context) : IteratingSystem(
         allOf(StickingComponent::class,
                 PositionComponent::class,
                 TetrominoComponent::class).get()) {
@@ -21,8 +21,10 @@ class StickingSystem(val tetrominoes: Array<Entity>, val map: List<Array<Entity>
         val log = logger<StickingSystem>()
     }
 
+    val pauseStatus = context.inject<PauseStatus>()
+
     override fun processEntity(entity: Entity?, deltaTime: Float) {
-        entity?.let {
+        if(pauseStatus.isNotPaused) entity?.let {
             val stickingTimer = it[Mappers.stickingMapper]!!.timer
 
             log.debug { "Entity with Sticking Component found: Timer: $stickingTimer" }

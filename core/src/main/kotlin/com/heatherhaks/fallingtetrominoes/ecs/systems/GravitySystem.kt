@@ -5,6 +5,7 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.heatherhaks.fallingtetrominoes.collisiondetection.Collision
 import com.heatherhaks.fallingtetrominoes.ecs.components.*
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.PauseStatus
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
 import ktx.ashley.*
 import ktx.inject.Context
@@ -18,9 +19,10 @@ class GravitySystem(val tetrominoes: Array<Entity>, val map: List<Array<Entity>>
     companion object {
         val log = logger<GravitySystem>()
     }
+    val pauseStatus = context.inject<PauseStatus>()
 
     override fun processEntity(entity: Entity?, deltaTime: Float) {
-        entity?.let {
+        if(pauseStatus.isNotPaused) entity?.let {
             val fallingTimer = it[Mappers.fallingMapper]!!.timer
 
             when {
