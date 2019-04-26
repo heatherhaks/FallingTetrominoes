@@ -8,7 +8,6 @@ import com.heatherhaks.fallingtetrominoes.FallingTetrominoes
 import com.heatherhaks.fallingtetrominoes.GameStates
 import com.heatherhaks.fallingtetrominoes.ecs.components.CanCollideComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.HasPlayerInputComponent
-import com.heatherhaks.fallingtetrominoes.ecs.components.StateComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
 import com.heatherhaks.fallingtetrominoes.ecs.systems.*
 import com.heatherhaks.fallingtetrominoes.ecs.templates.BlockBuilder
@@ -174,7 +173,10 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
             startTimer.stop()
         }
 
-        if(startTimer.isRunning()) handleStartTimerAndDisplay(delta)
+        if(startTimer.isRunning()) {
+            gameState.state = GameStates.UNPAUSING
+            handleStartTimerAndDisplay(delta)
+        }
 
         startTimer.update(delta)
     }

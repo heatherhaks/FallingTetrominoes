@@ -1,5 +1,5 @@
 package com.heatherhaks.fallingtetrominoes
 
 enum class GameStates {
-    STARTUP, PAUSED, RUNNING, GAME_OVER
+    STARTUP, PAUSED, UNPAUSING, RUNNING, GAME_OVER
 }
