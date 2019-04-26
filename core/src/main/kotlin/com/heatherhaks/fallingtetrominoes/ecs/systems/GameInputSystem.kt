@@ -2,13 +2,14 @@ package com.heatherhaks.fallingtetrominoes.ecs.systems
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
+import com.heatherhaks.fallingtetrominoes.GameStates
 import com.heatherhaks.fallingtetrominoes.collisiondetection.Collision
 import com.heatherhaks.fallingtetrominoes.ecs.components.HasPlayerInputComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.RotationComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.StickingComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.GameState
 import com.heatherhaks.fallingtetrominoes.injection.wrappers.GameplayKeys
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.PauseStatus
 import com.heatherhaks.fallingtetrominoes.safeAdd
 import com.heatherhaks.fallingtetrominoes.tetrominoes.TetrominoHandler
 import com.heatherhaks.fallingtetrominoes.timers.Timer
@@ -43,11 +44,12 @@ class GameInputSystem(val context: Context, val map: List<Array<Entity>>, val te
 
     private var isSticking = false
     private val gameplayKeys = context.inject<GameplayKeys>()
-    val pauseStatus = context.inject<PauseStatus>()
+
+    val gameState = context.inject<GameState>()
 
     //TODO implement holding
     override fun processEntity(entity: Entity?, deltaTime: Float) {
-        if(pauseStatus.isNotPaused) entity?.let {
+        if(gameState.state == GameStates.RUNNING) entity?.let {
             lateralDelta = 0
             verticalDelta = 0
 

@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.halfdeadgames.kterminal.KTerminalData
 import com.heatherhaks.fallingtetrominoes.FallingTetrominoes
+import com.heatherhaks.fallingtetrominoes.GameStates
 import com.heatherhaks.fallingtetrominoes.ecs.components.CanCollideComponent
 import com.heatherhaks.fallingtetrominoes.ecs.components.HasPlayerInputComponent
+import com.heatherhaks.fallingtetrominoes.ecs.components.StateComponent
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
 import com.heatherhaks.fallingtetrominoes.ecs.systems.*
 import com.heatherhaks.fallingtetrominoes.ecs.templates.BlockBuilder
@@ -26,6 +28,7 @@ import ktx.inject.Context
 //TODO implement kicks
 //TODO implement score
 //TODO refactor pause screen + link to options screen
+//TODO implement leveling as you clear lines
 
 class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val batch = context.inject<SpriteBatch>()
@@ -59,7 +62,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val inputSystem = GameInputSystem(context, map, tetrominoes)
 
     var startTimer = Timer(3f)
-    val pauseStatus = context.inject<PauseStatus>()
+    val gameState = context.inject<GameState>()
     val gameplayKeys = context.inject<GameplayKeys>()
 
     private fun resetMap() {
@@ -98,7 +101,6 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
         engine.removeSystem(ghostPositioningSystem)
     }
     init {
-        //TODO replace with leveling as you clear lines
 
         map.forEach {
             it.forEach{ block ->
@@ -141,6 +143,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
         engine.update(delta)
 
         pauseHandler(delta)
+        startCountdownHandler(delta)
 
         batch.use {
             renderTerminals(0f, 0f)
@@ -148,27 +151,32 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     }
 
     private fun pauseHandler(delta: Float) {
-        if(pauseStatus.isPaused) {
-            if(startTimer.isNotRunning() && startTimer.isNotFinished()) displayPausePanel()
-            if(gameplayKeys.pauseKey.isJustPressed()) {
-                startTimer.restart()
+        when(gameState.state) {
+            GameStates.PAUSED -> {
+                if(startTimer.isNotRunning() && startTimer.isNotFinished()) displayPausePanel()
+                if(gameplayKeys.pauseKey.isJustPressed()) {
+                    startTimer.restart()
+                }
             }
-        } else {
-            if(gameplayKeys.pauseKey.isJustPressed()) {
-                pauseStatus.isPaused = true
+            GameStates.RUNNING -> {
+                if(gameplayKeys.pauseKey.isJustPressed()) {
+                    gameState.state = GameStates.PAUSED
+                }
             }
         }
 
+        inputHandler.tick(delta)
+    }
+
+    private fun startCountdownHandler(delta: Float) {
         if(startTimer.isFinished()) {
-            pauseStatus.isNotPaused = true
+            gameState.state = GameStates.RUNNING
             startTimer.stop()
         }
 
         if(startTimer.isRunning()) handleStartTimerAndDisplay(delta)
 
         startTimer.update(delta)
-
-        inputHandler.tick(delta)
     }
 
     private fun displayPausePanel() {

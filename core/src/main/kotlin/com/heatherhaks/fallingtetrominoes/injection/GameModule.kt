@@ -19,7 +19,7 @@ class GameModule(game: FallingTetrominoes) {
             bindSingleton(SpawningLocation())
             bindSingleton(GameplayKeys())
             bindSingleton(MenuKeys())
-            bindSingleton(PauseStatus())
+            bindSingleton(GameState())
         }
 
         context.register {

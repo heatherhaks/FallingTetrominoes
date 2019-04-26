@@ -3,10 +3,11 @@ package com.heatherhaks.fallingtetrominoes.ecs.systems
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.Color
+import com.heatherhaks.fallingtetrominoes.GameStates
 import com.heatherhaks.fallingtetrominoes.collisiondetection.Collision
 import com.heatherhaks.fallingtetrominoes.ecs.components.*
 import com.heatherhaks.fallingtetrominoes.ecs.mappers.Mappers
-import com.heatherhaks.fallingtetrominoes.injection.wrappers.PauseStatus
+import com.heatherhaks.fallingtetrominoes.injection.wrappers.GameState
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.inject.Context
@@ -21,10 +22,10 @@ class StickingSystem(val tetrominoes: Array<Entity>, val map: List<Array<Entity>
         val log = logger<StickingSystem>()
     }
 
-    val pauseStatus = context.inject<PauseStatus>()
+    val gameState = context.inject<GameState>()
 
     override fun processEntity(entity: Entity?, deltaTime: Float) {
-        if(pauseStatus.isNotPaused) entity?.let {
+        if(gameState.state == GameStates.RUNNING) entity?.let {
             val stickingTimer = it[Mappers.stickingMapper]!!.timer
 
             log.debug { "Entity with Sticking Component found: Timer: $stickingTimer" }
