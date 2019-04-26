@@ -39,12 +39,12 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val terminals = context.inject<Terminals>()
     private val renderers = context.inject<Renderers>()
 
-    val tetrominoes = TetrominoBuilder.getTetrominoEntities(engine)
+    private val tetrominoes = TetrominoBuilder.getTetrominoEntities(engine)
 
     //TODO replace this with sane programming
     private val spawningLocation = context.inject<SpawningLocation>()
 
-    val playerEntity = engine.createEntity()
+    private val playerEntity = engine.createEntity()
 
     private val offsetX = 0
     private val offsetY = 0
@@ -60,9 +60,9 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
     private val ghostPositioningSystem = GhostPositioningSystem(tetrominoes, map)
     private val inputSystem = GameInputSystem(context, map, tetrominoes)
 
-    var startTimer = Timer(3f)
-    val gameState = context.inject<GameState>()
-    val gameplayKeys = context.inject<GameplayKeys>()
+    private var startTimer = Timer(3f)
+    private val gameState = context.inject<GameState>()
+    private val gameplayKeys = context.inject<GameplayKeys>()
 
     private fun resetMap() {
         map.forEachIndexed {j, row ->
