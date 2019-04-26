@@ -150,7 +150,6 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
                 pauseStatus.isPaused = true
             }
         }
-
         if(startTimer.isFinished()) {
             pauseStatus.isNotPaused = true
             startTimer.stop()

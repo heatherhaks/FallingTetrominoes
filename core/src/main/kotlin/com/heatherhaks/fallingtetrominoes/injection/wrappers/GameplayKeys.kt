@@ -11,8 +11,7 @@ class GameplayKeys {
     val softDropKey = KeyData("SOFT DROP", Input.Keys.S)
     val hardDropKey = KeyData("HARD DROP", Input.Keys.SPACE)
     val holdKey = KeyData("HOLD", Input.Keys.SHIFT_LEFT)
-//    val pauseKey = KeyData("PAUSE", Input.Keys.ESCAPE)
-    val pauseKey = KeyData("PAUSE", Input.Keys.SHIFT_RIGHT)
+    val pauseKey = KeyData("PAUSE", Input.Keys.ESCAPE)
 
     val keyArray = arrayOf(leftKey, rightKey, clockwiseKey, counterclockwiseKey, softDropKey, hardDropKey, holdKey, pauseKey)
 }
