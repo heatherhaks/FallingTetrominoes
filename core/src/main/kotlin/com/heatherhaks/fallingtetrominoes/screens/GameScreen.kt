@@ -140,6 +140,14 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
         clearLines()
         engine.update(delta)
 
+        pauseHandler(delta)
+
+        batch.use {
+            renderTerminals(0f, 0f)
+        }
+    }
+
+    private fun pauseHandler(delta: Float) {
         if(pauseStatus.isPaused) {
             if(startTimer.isNotRunning() && startTimer.isNotFinished()) displayPausePanel()
             if(gameplayKeys.pauseKey.isJustPressed()) {
@@ -150,6 +158,7 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
                 pauseStatus.isPaused = true
             }
         }
+
         if(startTimer.isFinished()) {
             pauseStatus.isNotPaused = true
             startTimer.stop()
@@ -160,10 +169,6 @@ class GameScreen(val context: Context, game: FallingTetrominoes) : KtxScreen {
         startTimer.update(delta)
 
         inputHandler.tick(delta)
-
-        batch.use {
-            renderTerminals(0f, 0f)
-        }
     }
 
     private fun displayPausePanel() {
